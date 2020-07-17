@@ -18,7 +18,7 @@ namespace Kogane
 		//====================================================================================
 		// 定数
 		//====================================================================================
-		private const string ENABLE_SYMBOL_NAME = "ENABLE_DEBUG_PANEL";
+		private const string DISABLE_CONDITION_STRING = "GgBa4RS3NdhECfu8wiUbH3wxpiRRXPja";
 
 		//====================================================================================
 		// 変数(SerializeField)
@@ -33,10 +33,6 @@ namespace Kogane
 		[SerializeField] private GameObject    m_root          = default;
 
 		//====================================================================================
-		// 変数
-		//====================================================================================
-
-		//====================================================================================
 		// 関数
 		//====================================================================================
 		/// <summary>
@@ -44,14 +40,16 @@ namespace Kogane
 		/// </summary>
 		private void Awake()
 		{
-#if ENABLE_DEBUG_PANEL
-			m_closeButtonUI.onClick.AddListener( () => SetState( false ) );
-			m_openButtonUI .onClick.AddListener( () => SetState( true  ) );
-#else
+#if DISABLE_UNI_UI_DEBUG_PANEL
 			Destroy( gameObject );
+#else
+			m_closeButtonUI.onClick.AddListener( () => SetState( false ) );
+			m_openButtonUI.onClick.AddListener( () => SetState( true ) );
 #endif
 		}
 
+#if DISABLE_UNI_UI_DEBUG_PANEL
+#else
 		/// <summary>
 		/// 開始する時に呼び出されます
 		/// </summary>
@@ -63,11 +61,14 @@ namespace Kogane
 
 			SetState( false );
 		}
+#endif
 
 		/// <summary>
 		/// ステートを設定します
 		/// </summary>
-		[Conditional( ENABLE_SYMBOL_NAME )]
+#if DISABLE_UNI_UI_DEBUG_PANEL
+		[Conditional( DISABLE_CONDITION_STRING )]
+#endif
 		private void SetState( bool isOpen )
 		{
 			m_openBaseUI.SetActive( isOpen );
@@ -77,7 +78,9 @@ namespace Kogane
 		/// <summary>
 		/// 表示するかどうかを設定します
 		/// </summary>
-		[Conditional( ENABLE_SYMBOL_NAME )]
+#if DISABLE_UNI_UI_DEBUG_PANEL
+		[Conditional( DISABLE_CONDITION_STRING )]
+#endif
 		public void SetVisible( bool isVisible )
 		{
 			var alpha = isVisible ? 1 : 0;
@@ -87,7 +90,9 @@ namespace Kogane
 		/// <summary>
 		/// 表示を設定します
 		/// </summary>
-		[Conditional( ENABLE_SYMBOL_NAME )]
+#if DISABLE_UNI_UI_DEBUG_PANEL
+		[Conditional( DISABLE_CONDITION_STRING )]
+#endif
 		public void SetDisp( params UDPData[] list )
 		{
 			foreach ( Transform n in m_layoutUI.transform )
