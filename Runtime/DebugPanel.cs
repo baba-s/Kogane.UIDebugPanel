@@ -3,6 +3,7 @@
 // ReSharper disable UnusedMember.Local
 // ReSharper disable NotAccessedField.Local
 
+using System.Collections.Generic;
 using System.Diagnostics;
 using Kogane.Internal;
 using UnityEngine;
@@ -106,6 +107,17 @@ namespace Kogane
 #endif
         public void Setup( params DebugPanelData[] list )
         {
+            Setup( ( IReadOnlyList<DebugPanelData> )list );
+        }
+
+        /// <summary>
+        /// 表示を設定します
+        /// </summary>
+#if KOGANE_DISABLE_UI_DEBUG_PANEL
+        [Conditional( DISABLE_CONDITION_STRING )]
+#endif
+        public void Setup( IReadOnlyList<DebugPanelData> list )
+        {
             foreach ( Transform n in m_layoutUI.transform )
             {
                 Destroy( n.gameObject );
@@ -113,7 +125,7 @@ namespace Kogane
 
             m_buttonUI.gameObject.SetActive( true );
 
-            for ( var i = 0; i < list.Length; i++ )
+            for ( var i = 0; i < list.Count; i++ )
             {
                 var data = list[ i ];
                 var obj  = Instantiate( m_buttonUI, m_layoutUI.transform );
