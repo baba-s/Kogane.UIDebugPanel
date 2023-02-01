@@ -5,6 +5,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Kogane.Internal;
 using UnityEngine;
 using UnityEngine.UI;
@@ -41,7 +42,28 @@ namespace Kogane
         //====================================================================================
         // 変数(static)
         //====================================================================================
-        private static bool m_isOpen;
+        private static bool             m_isOpen;
+        private static List<DebugPanel> m_debugPanels;
+        private static bool             m_isDisable;
+
+        //================================================================================
+        // プロパティ
+        //================================================================================
+        public static bool IsDisable
+        {
+            get => m_isDisable;
+            set
+            {
+                m_isDisable = value;
+                if ( m_debugPanels == null ) return;
+                foreach ( var debugPanel in m_debugPanels.Where( x => x != null ) )
+                {
+                    Destroy( debugPanel.gameObject );
+                }
+
+                m_debugPanels.Clear();
+            }
+        }
 
         //====================================================================================
         // 関数
@@ -54,10 +76,29 @@ namespace Kogane
 #if KOGANE_DISABLE_UI_DEBUG_PANEL
             Destroy( gameObject );
 #else
+            if ( IsDisable )
+            {
+                Destroy( gameObject );
+                return;
+            }
+
+            m_debugPanels.Add( this );
+
             m_closeButtonUI.onClick.AddListener( () => SetState( false ) );
             m_openButtonUI.onClick.AddListener( () => SetState( true ) );
 #endif
         }
+
+#if KOGANE_DISABLE_UI_DEBUG_PANEL
+#else
+        /// <summary>
+        /// 破棄される時に呼び出されます
+        /// </summary>
+        private void OnDestroy()
+        {
+            m_debugPanels.Remove( this );
+        }
+#endif
 
 #if KOGANE_DISABLE_UI_DEBUG_PANEL
 #else
@@ -82,6 +123,8 @@ namespace Kogane
 #endif
         private void SetState( bool isOpen )
         {
+            if ( this == null ) return;
+
             m_isOpen = isOpen;
             m_openBaseUI.SetActive( isOpen );
             m_closeBaseUI.SetActive( !isOpen );
@@ -95,6 +138,8 @@ namespace Kogane
 #endif
         public void SetVisible( bool isVisible )
         {
+            if ( this == null ) return;
+
             var alpha = isVisible ? 1 : 0;
             m_canvasGroup.alpha = alpha;
         }
@@ -107,6 +152,8 @@ namespace Kogane
 #endif
         public void Setup( params DebugPanelData[] list )
         {
+            if ( this == null ) return;
+
             Setup( ( IReadOnlyList<DebugPanelData> )list );
         }
 
@@ -118,6 +165,8 @@ namespace Kogane
 #endif
         public void Setup( IReadOnlyList<DebugPanelData> list )
         {
+            if ( this == null ) return;
+
             foreach ( Transform n in m_layoutUI.transform )
             {
                 Destroy( n.gameObject );
@@ -147,7 +196,9 @@ namespace Kogane
         [RuntimeInitializeOnLoadMethod( RuntimeInitializeLoadType.BeforeSceneLoad )]
         private static void RuntimeInitializeOnLoadMethod()
         {
-            m_isOpen = false;
+            m_isOpen      = false;
+            m_debugPanels = new();
+            m_isDisable   = false;
         }
 #endif
     }
