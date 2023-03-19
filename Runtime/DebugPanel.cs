@@ -38,6 +38,12 @@ namespace Kogane
         [SerializeField] private DebugPanelButton m_buttonUI;
         [SerializeField] private CanvasGroup      m_canvasGroup;
         [SerializeField] private GameObject       m_root;
+        [SerializeField] private GameObject       m_safePanelArea;
+
+        //================================================================================
+        // 変数
+        //================================================================================
+        private bool m_isInitialize;
 
         //====================================================================================
         // 変数(static)
@@ -74,8 +80,22 @@ namespace Kogane
         private void Awake()
         {
 #if KOGANE_DISABLE_UI_DEBUG_PANEL
-            Destroy( gameObject );
+            // Destroy( gameObject );
 #else
+            Initialize();
+#endif
+        }
+
+        /// <summary>
+        /// 初期化します
+        /// </summary>
+        private void Initialize()
+        {
+            if ( m_isInitialize ) return;
+            m_isInitialize = true;
+
+            m_safePanelArea.SetActive( true );
+
             if ( IsDisable )
             {
                 Destroy( gameObject );
@@ -86,7 +106,6 @@ namespace Kogane
 
             m_closeButtonUI.onClick.AddListener( () => SetState( false ) );
             m_openButtonUI.onClick.AddListener( () => SetState( true ) );
-#endif
         }
 
 #if KOGANE_DISABLE_UI_DEBUG_PANEL
@@ -107,6 +126,8 @@ namespace Kogane
         /// </summary>
         private void Start()
         {
+            Initialize();
+
             m_root.SetActive( true );
             m_openBaseUI.SetActive( false );
             m_closeBaseUI.SetActive( true );
@@ -125,6 +146,8 @@ namespace Kogane
         {
             if ( this == null ) return;
 
+            Initialize();
+
             m_isOpen = isOpen;
             m_openBaseUI.SetActive( isOpen );
             m_closeBaseUI.SetActive( !isOpen );
@@ -139,6 +162,8 @@ namespace Kogane
         public void SetVisible( bool isVisible )
         {
             if ( this == null ) return;
+
+            Initialize();
 
             var alpha = isVisible ? 1 : 0;
             m_canvasGroup.alpha = alpha;
@@ -166,6 +191,8 @@ namespace Kogane
         public void Setup( IReadOnlyList<DebugPanelData> list )
         {
             if ( this == null ) return;
+
+            Initialize();
 
             foreach ( Transform n in m_layoutUI.transform )
             {
